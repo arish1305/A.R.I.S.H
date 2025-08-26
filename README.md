@@ -1,42 +1,59 @@
-<h1 align="center">🤖 A.R.I.S.H. - Artificial Responsive Intelligent System Helper</h1>
+:
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/Artificial%20Intelligence-8A2BE2?style=for-the-badge&logo=openai&logoColor=white" />
-  <img src="https://img.shields.io/badge/Speech%20Recognition-FF6F00?style=for-the-badge&logo=google&logoColor=white" />
-  <img src="https://img.shields.io/badge/Text%20to%20Speech-32CD32?style=for-the-badge&logo=amazon&logoColor=white" />
-</p>
+🧠 A.R.I.S.H. - Artificial Responsive Intelligent System Helper
 
----
+A.R.I.S.H. (Artificial Responsive Intelligent System Helper) is a Python-based personal AI assistant inspired by Iron Man’s J.A.R.V.I.S. It can perform tasks like searching the web, checking weather, sending emails, voice conversations, and more.
 
-## 🌟 About A.R.I.S.H.
-**A.R.I.S.H.** (*Artificial Responsive Intelligent System Helper*) is a **voice-controlled AI assistant** inspired by Iron Man’s J.A.R.V.I.S. 🦾.  
-It combines **speech recognition, AI-driven responses, and system automation** to act as your **personal smart assistant**.
+✨ Features
 
----
+Search the Web
 
-## ✨ Features
-✅ Listens & responds to voice commands  
-✅ Provides AI-powered answers  
-✅ Text-to-Speech conversations  
-✅ Opens websites & applications  
-✅ Automates simple system tasks  
-✅ Fully Python-based and customizable  
+Check Weather
 
----
+Send Emails
 
-## 🛠️ Tech Stack
-- 🐍 **Python**
-- 🎙️ **SpeechRecognition**
-- 🔊 **pyttsx3 / gTTS**
-- 🤖 **AI APIs (OpenAI / HuggingFace)**
-- ⚙️ **OS & Web automation**
+Vision through Camera (Web app)
 
----
+Speech Interaction
 
-## 🚀 Getting Started
+Chat (Web app)
 
-### 1️⃣ Clone the repo
-```bash
+Real-time conversations powered by LiveKit (Free)
+
+⚙️ Setup Instructions
+1. Clone the Repository
 git clone https://github.com/arish1305/A.R.I.S.H.git
-cd A.R.I.S.H
+cd arish_ai
+
+2. Create and Activate Virtual Environment
+python -m venv venv
+
+3. Install Required Libraries
+pip install -r requirements.txt
+
+4. Configure Environment Variables
+
+5. Run the Assistant
+python main.py
+
+🧪 Example Usage
+
+"What’s the weather today?" → Fetches live weather.
+
+"Search Elon Musk" → Opens a web search.
+
+"Send an email to John" → Composes and sends an email.
+
+"Open camera" → Activates vision mode.
+
+Use the Web App → Enables vision and chat features.
+
+🔮 Future Improvements
+
+Add integrations with APIs (news, stock market, reminders).
+
+Smarter conversations with advanced AI models.
+
+Desktop GUI version.
+
+Mobile integration.
