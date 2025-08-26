@@ -38,5 +38,5 @@ It combines **speech recognition, AI-driven responses, and system automation** t
 
 ### 1️⃣ Clone the repo
 ```bash
-git clone https://github.com/USERNAME/arish_ai.git
-cd arish_ai
+git clone https://github.com/arish1305/A.R.I.S.H.git
+cd A.R.I.S.H
