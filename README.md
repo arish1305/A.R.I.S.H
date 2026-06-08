@@ -1,59 +1,106 @@
-:
+# A.R.I.S.H
 
-🧠 A.R.I.S.H. - Artificial Responsive Intelligent System Helper
+A.R.I.S.H stands for Artificial Responsive Intelligent System Helper. This
+version is a local-first assistant foundation: it runs without LiveKit, OpenAI,
+Google realtime models, or other proprietary AI services.
 
-A.R.I.S.H. (Artificial Responsive Intelligent System Helper) is a Python-based personal AI assistant inspired by Iron Man’s J.A.R.V.I.S. It can perform tasks like searching the web, checking weather, sending emails, voice conversations, and more.
+The project now starts cleanly as a CLI, FastAPI backend, and browser dashboard.
+Ollama is optional. When Ollama is not running, A.R.I.S.H still handles built-in
+commands with a local fallback instead of crashing.
 
-✨ Features
+## What Works Now
 
-Search the Web
+- Local CLI chat through `python agent.py` or `python main.py`
+- FastAPI API and dashboard through `python main.py api`
+- SQLite short-term chat history and long-term memories
+- Memory commands: remember, list, summarize, and forget
+- DuckDuckGo search-link creation without sending data automatically
+- Optional live weather via `wttr.in`
+- Safe desktop launching for whitelisted apps
+- Optional Ollama integration for local LLM responses
 
-Check Weather
+## Setup
 
-Send Emails
-
-Vision through Camera (Web app)
-
-Speech Interaction
-
-Chat (Web app)
-
-Real-time conversations powered by LiveKit (Free)
-
-⚙️ Setup Instructions
-1. Clone the Repository
-git clone https://github.com/arish1305/A.R.I.S.H.git
-cd arish_ai
-
-2. Create and Activate Virtual Environment
+```powershell
 python -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
 
-3. Install Required Libraries
-pip install -r requirements.txt
+## Run The Assistant
 
-4. Configure Environment Variables
+Interactive CLI:
 
-5. Run the Assistant
-python main.py
+```powershell
+python agent.py
+```
 
-🧪 Example Usage
+One message:
 
-"What’s the weather today?" → Fetches live weather.
+```powershell
+python main.py chat "remember this: my preferred model is qwen3"
+python main.py chat "what do you remember"
+```
 
-"Search Elon Musk" → Opens a web search.
+API and dashboard:
 
-"Send an email to John" → Composes and sends an email.
+```powershell
+python main.py api --host 127.0.0.1 --port 8000
+```
 
-"Open camera" → Activates vision mode.
+Then open:
 
-Use the Web App → Enables vision and chat features.
+```text
+http://127.0.0.1:8000
+```
 
-🔮 Future Improvements
+## Optional Ollama
 
-Add integrations with APIs (news, stock market, reminders).
+Install Ollama, then run:
 
-Smarter conversations with advanced AI models.
+```powershell
+ollama pull qwen3
+ollama run qwen3
+```
 
-Desktop GUI version.
+A.R.I.S.H talks to Ollama at `http://127.0.0.1:11434` by default.
 
-Mobile integration.
+## Environment
+
+Copy `.env.example` to `.env` and adjust values as needed.
+
+```text
+ARISH_OLLAMA_URL=http://127.0.0.1:11434
+ARISH_OLLAMA_MODEL=qwen3
+ARISH_ENABLE_INTERNET_TOOLS=false
+ARISH_ENABLE_DESKTOP_TOOLS=true
+ARISH_OPEN_BROWSER_ON_SEARCH=false
+ARISH_DB_PATH=data/arish.sqlite3
+```
+
+Set `ARISH_ENABLE_INTERNET_TOOLS=true` only when you want network-backed tools
+like live weather. Search commands create a URL by default and do not fetch
+results automatically.
+
+## API
+
+- `GET /health`
+- `POST /chat` with `{ "message": "...", "session_id": "default" }`
+- `GET /memories`
+- `POST /memories` with `{ "content": "...", "tags": [] }`
+- `DELETE /memories/{memory_id}`
+
+## Tests
+
+```powershell
+python -m unittest discover -s tests
+```
+
+## Next Build Targets
+
+- Whisper speech-to-text module
+- Piper text-to-speech module
+- OpenWakeWord wake-word listener
+- ChromaDB semantic memory
+- Playwright browser agent
+- Vision module for webcam and screenshots

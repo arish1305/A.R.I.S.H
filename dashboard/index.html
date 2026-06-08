@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A.R.I.S.H Dashboard</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f6f2;
+        --panel: #ffffff;
+        --ink: #1f2428;
+        --muted: #667071;
+        --line: #d8ddd7;
+        --accent: #2f7d5f;
+        --accent-ink: #ffffff;
+        --warn: #b2533e;
+        --soft: #edf4ef;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      aside {
+        border-right: 1px solid var(--line);
+        background: #fbfbf8;
+        padding: 20px 16px;
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 24px;
+      }
+
+      .brand strong {
+        font-size: 22px;
+        letter-spacing: 0;
+      }
+
+      .brand span,
+      .status-row,
+      .log-entry,
+      .memory-meta {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .tabs {
+        display: grid;
+        gap: 8px;
+      }
+
+      .tab {
+        width: 100%;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+        padding: 10px 12px;
+        text-align: left;
+      }
+
+      .tab[aria-selected="true"] {
+        background: var(--soft);
+        border-color: #bfd7c9;
+        color: #174832;
+      }
+
+      main {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-width: 0;
+      }
+
+      header {
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        min-height: 68px;
+        padding: 14px 24px;
+      }
+
+      h1 {
+        font-size: 20px;
+        font-weight: 650;
+        margin: 0;
+      }
+
+      .status-row {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+        white-space: nowrap;
+      }
+
+      .dot {
+        background: var(--warn);
+        border-radius: 999px;
+        display: inline-block;
+        height: 9px;
+        width: 9px;
+      }
+
+      .dot.ok {
+        background: var(--accent);
+      }
+
+      .view {
+        display: none;
+        min-height: 0;
+        padding: 24px;
+      }
+
+      .view.active {
+        display: block;
+      }
+
+      .chat-layout {
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        height: calc(100vh - 116px);
+        max-width: 980px;
+      }
+
+      .messages {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        overflow: auto;
+        padding: 16px;
+      }
+
+      .message {
+        border-bottom: 1px solid #eef0ed;
+        padding: 13px 2px;
+      }
+
+      .message:last-child {
+        border-bottom: 0;
+      }
+
+      .role {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+      }
+
+      .content {
+        line-height: 1.48;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+
+      form {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      textarea,
+      input {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--ink);
+        font: inherit;
+        min-width: 0;
+        outline: none;
+        padding: 11px 12px;
+        width: 100%;
+      }
+
+      textarea {
+        min-height: 48px;
+        resize: vertical;
+      }
+
+      textarea:focus,
+      input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(47, 125, 95, 0.14);
+      }
+
+      button.primary,
+      button.secondary,
+      button.danger {
+        border: 1px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 650;
+        min-height: 44px;
+        padding: 0 16px;
+        white-space: nowrap;
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
+
+      button.secondary {
+        background: #ffffff;
+        border-color: var(--line);
+        color: var(--ink);
+      }
+
+      button.danger {
+        background: #fff3ef;
+        border-color: #edc2b6;
+        color: #873423;
+      }
+
+      button:disabled {
+        cursor: progress;
+        opacity: 0.6;
+      }
+
+      .section {
+        max-width: 980px;
+      }
+
+      .toolbar {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .memory-list,
+      .settings-list,
+      .log-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .memory-item,
+      .settings-item,
+      .log-entry {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 13px 14px;
+      }
+
+      .memory-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+      }
+
+      .settings-item {
+        display: grid;
+        gap: 4px;
+      }
+
+      .settings-item strong {
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+
+      @media (max-width: 760px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        aside {
+          border-bottom: 1px solid var(--line);
+          border-right: 0;
+          padding: 14px;
+        }
+
+        .tabs {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .tab {
+          padding: 9px 8px;
+          text-align: center;
+        }
+
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 6px;
+          padding: 14px;
+        }
+
+        .view {
+          padding: 14px;
+        }
+
+        .chat-layout {
+          height: calc(100vh - 206px);
+        }
+
+        form {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .toolbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside>
+        <div class="brand">
+          <strong>A.R.I.S.H</strong>
+          <span>Local assistant</span>
+        </div>
+        <nav class="tabs" aria-label="Dashboard sections">
+          <button class="tab" data-tab="chat" aria-selected="true">Chat</button>
+          <button class="tab" data-tab="memory" aria-selected="false">Memory</button>
+          <button class="tab" data-tab="settings" aria-selected="false">Settings</button>
+          <button class="tab" data-tab="logs" aria-selected="false">Logs</button>
+        </nav>
+      </aside>
+
+      <main>
+        <header>
+          <h1 id="viewTitle">Chat</h1>
+          <div class="status-row">
+            <span class="dot" id="statusDot"></span>
+            <span id="statusText">Checking system</span>
+          </div>
+        </header>
+
+        <section class="view active" id="chatView">
+          <div class="chat-layout">
+            <div class="messages" id="messages"></div>
+            <form id="chatForm">
+              <textarea id="messageInput" name="message" placeholder="Message A.R.I.S.H" autocomplete="off"></textarea>
+              <button class="primary" id="sendButton" type="submit">Send</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="view" id="memoryView">
+          <div class="section">
+            <form class="toolbar" id="memoryForm">
+              <input id="memoryInput" name="memory" placeholder="Add memory" />
+              <button class="primary" type="submit">Remember</button>
+              <button class="secondary" type="button" id="refreshMemoryButton">Refresh</button>
+            </form>
+            <div class="memory-list" id="memoryList"></div>
+          </div>
+        </section>
+
+        <section class="view" id="settingsView">
+          <div class="section">
+            <div class="settings-list" id="settingsList"></div>
+          </div>
+        </section>
+
+        <section class="view" id="logsView">
+          <div class="section">
+            <div class="toolbar">
+              <button class="secondary" type="button" id="clearLogsButton">Clear</button>
+            </div>
+            <div class="log-list" id="logs"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const state = {
+        sessionId: "dashboard",
+        logs: [],
+        health: null,
+      };
+
+      const messages = document.querySelector("#messages");
+      const logs = document.querySelector("#logs");
+      const settingsList = document.querySelector("#settingsList");
+      const memoryList = document.querySelector("#memoryList");
+      const statusDot = document.querySelector("#statusDot");
+      const statusText = document.querySelector("#statusText");
+      const viewTitle = document.querySelector("#viewTitle");
+
+      function addLog(text) {
+        state.logs.unshift({ text, at: new Date().toLocaleTimeString() });
+        state.logs = state.logs.slice(0, 80);
+        renderLogs();
+      }
+
+      function renderLogs() {
+        logs.replaceChildren();
+        if (state.logs.length === 0) {
+          const item = document.createElement("div");
+          item.className = "log-entry";
+          item.textContent = "No log entries";
+          logs.append(item);
+          return;
+        }
+        state.logs.forEach((entry) => {
+          const item = document.createElement("div");
+          item.className = "log-entry";
+          item.textContent = `${entry.at} - ${entry.text}`;
+          logs.append(item);
+        });
+      }
+
+      function addMessage(role, content) {
+        const item = document.createElement("div");
+        item.className = "message";
+
+        const roleEl = document.createElement("div");
+        roleEl.className = "role";
+        roleEl.textContent = role;
+
+        const contentEl = document.createElement("div");
+        contentEl.className = "content";
+        contentEl.textContent = content;
+
+        item.append(roleEl, contentEl);
+        messages.append(item);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      async function sendMessage(message) {
+        addMessage("You", message);
+        addLog("Chat request sent");
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, session_id: state.sessionId }),
+        });
+        if (!response.ok) {
+          throw new Error(`Chat failed with ${response.status}`);
+        }
+        const data = await response.json();
+        addMessage("A.R.I.S.H", data.response);
+        addLog(`Action: ${(data.actions || []).join(", ") || "chat"}`);
+        await loadMemories();
+      }
+
+      async function loadHealth() {
+        const response = await fetch("/health");
+        if (!response.ok) {
+          throw new Error(`Health failed with ${response.status}`);
+        }
+        state.health = await response.json();
+        renderHealth();
+        renderSettings();
+      }
+
+      function renderHealth() {
+        const ok = Boolean(state.health && state.health.ok);
+        statusDot.classList.toggle("ok", ok);
+        statusText.textContent = ok
+          ? `API ready, Ollama ${state.health.ollama_available ? "ready" : "offline"}`
+          : "System unavailable";
+      }
+
+      function renderSettings() {
+        settingsList.replaceChildren();
+        const health = state.health || {};
+        const entries = [
+          ["Project", health.project || "A.R.I.S.H"],
+          ["Model", health.ollama_model || "qwen3"],
+          ["Ollama", health.ollama_available ? "Available" : "Offline"],
+          ["Internet Tools", health.internet_tools ? "Enabled" : "Disabled"],
+          ["Desktop Tools", health.desktop_tools ? "Enabled" : "Disabled"],
+          ["Database", health.db_path || ""],
+        ];
+
+        entries.forEach(([label, value]) => {
+          const item = document.createElement("div");
+          item.className = "settings-item";
+          const strong = document.createElement("strong");
+          strong.textContent = label;
+          const span = document.createElement("span");
+          span.textContent = value;
+          item.append(strong, span);
+          settingsList.append(item);
+        });
+      }
+
+      async function loadMemories() {
+        const response = await fetch("/memories");
+        if (!response.ok) {
+          throw new Error(`Memories failed with ${response.status}`);
+        }
+        const data = await response.json();
+        renderMemories(data.memories || []);
+      }
+
+      function renderMemories(memories) {
+        memoryList.replaceChildren();
+        if (memories.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "memory-item";
+          empty.textContent = "No saved memories";
+          memoryList.append(empty);
+          return;
+        }
+
+        memories.forEach((memory) => {
+          const item = document.createElement("div");
+          item.className = "memory-item";
+
+          const body = document.createElement("div");
+          const content = document.createElement("div");
+          content.className = "content";
+          content.textContent = memory.content;
+          const meta = document.createElement("div");
+          meta.className = "memory-meta";
+          meta.textContent = `Memory ${memory.id}`;
+          body.append(content, meta);
+
+          const button = document.createElement("button");
+          button.className = "danger";
+          button.type = "button";
+          button.textContent = "Forget";
+          button.addEventListener("click", async () => {
+            await fetch(`/memories/${memory.id}`, { method: "DELETE" });
+            addLog(`Forgot memory ${memory.id}`);
+            await loadMemories();
+          });
+
+          item.append(body, button);
+          memoryList.append(item);
+        });
+      }
+
+      document.querySelector("#chatForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const input = document.querySelector("#messageInput");
+        const button = document.querySelector("#sendButton");
+        const message = input.value.trim();
+        if (!message) {
+          return;
+        }
+        input.value = "";
+        button.disabled = true;
+        try {
+          await sendMessage(message);
+        } catch (error) {
+          addMessage("A.R.I.S.H", error.message);
+          addLog(error.message);
+        } finally {
+          button.disabled = false;
+          input.focus();
+        }
+      });
+
+      document.querySelector("#memoryForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const input = document.querySelector("#memoryInput");
+        const content = input.value.trim();
+        if (!content) {
+          return;
+        }
+        await fetch("/memories", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content }),
+        });
+        input.value = "";
+        addLog("Memory saved");
+        await loadMemories();
+      });
+
+      document.querySelector("#refreshMemoryButton").addEventListener("click", loadMemories);
+      document.querySelector("#clearLogsButton").addEventListener("click", () => {
+        state.logs = [];
+        renderLogs();
+      });
+
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach((tab) => {
+            tab.setAttribute("aria-selected", String(tab === button));
+          });
+          document.querySelectorAll(".view").forEach((view) => {
+            view.classList.remove("active");
+          });
+          document.querySelector(`#${button.dataset.tab}View`).classList.add("active");
+          viewTitle.textContent = button.textContent;
+        });
+      });
+
+      addMessage("A.R.I.S.H", "Local systems are online.");
+      renderLogs();
+      loadHealth().catch((error) => {
+        statusText.textContent = "API unavailable";
+        addLog(error.message);
+      });
+      loadMemories().catch((error) => addLog(error.message));
+      setInterval(() => loadHealth().catch((error) => addLog(error.message)), 15000);
+    </script>
+  </body>
+</html>
