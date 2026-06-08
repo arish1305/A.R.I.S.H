@@ -1,59 +1,162 @@
-:
+# A.R.I.S.H
 
-🧠 A.R.I.S.H. - Artificial Responsive Intelligent System Helper
+A.R.I.S.H means Artificial Responsive Intelligent System Helper. Version 3.0 is
+a local-first assistant foundation for a JARVIS-inspired desktop AI assistant.
+It avoids LiveKit, OpenAI APIs, Anthropic APIs, Gemini APIs, LangChain, CrewAI,
+AutoGPT, and paid AI services.
 
-A.R.I.S.H. (Artificial Responsive Intelligent System Helper) is a Python-based personal AI assistant inspired by Iron Man’s J.A.R.V.I.S. It can perform tasks like searching the web, checking weather, sending emails, voice conversations, and more.
+## Current Status
 
-✨ Features
+Working now:
 
-Search the Web
+- Local CLI chat through `python main.py`
+- FastAPI backend and dashboard at `http://127.0.0.1:8000`
+- Ollama integration with Qwen preferred
+- SQLite chat history and memory commands
+- Native tool registry
+- Desktop helpers for safe app/folder/file/system actions
+- Browser URL and search helpers
+- Document reader for TXT, Markdown, PDF, and DOCX
+- Vision readiness plus screenshot capture through `mss`
+- Voice readiness checks for Whisper, Piper, and OpenWakeWord
 
-Check Weather
+Staged for the next implementation pass:
 
-Send Emails
+- Always-listening OpenWakeWord loop
+- Whisper microphone transcription
+- Piper playback integration
+- ChromaDB semantic long-term memory
+- Playwright autonomous browser control
+- Florence-2 OCR and image understanding
+- Webcam capture
 
-Vision through Camera (Web app)
+## Requirements
 
-Speech Interaction
+- Windows, macOS, or Linux
+- Python 3.11 recommended
+- Ollama installed and running locally
+- A local Ollama model, preferably Qwen
 
-Chat (Web app)
+This machine currently works with:
 
-Real-time conversations powered by LiveKit (Free)
+```text
+qwen3:latest
+```
 
-⚙️ Setup Instructions
-1. Clone the Repository
-git clone https://github.com/arish1305/A.R.I.S.H.git
-cd arish_ai
+The v3 config asks for `qwen3:4b`, and A.R.I.S.H automatically uses an installed
+Qwen model if the exact tag is not present.
 
-2. Create and Activate Virtual Environment
+## Setup
+
+```powershell
 python -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
 
-3. Install Required Libraries
-pip install -r requirements.txt
+Start Ollama:
 
-4. Configure Environment Variables
+```powershell
+ollama serve
+```
 
-5. Run the Assistant
+Install or run Qwen:
+
+```powershell
+ollama pull qwen3
+```
+
+## Run
+
+CLI:
+
+```powershell
 python main.py
+```
 
-🧪 Example Usage
+One message:
 
-"What’s the weather today?" → Fetches live weather.
+```powershell
+python main.py chat "who are you"
+```
 
-"Search Elon Musk" → Opens a web search.
+Dashboard/API:
 
-"Send an email to John" → Composes and sends an email.
+```powershell
+python main.py api --host 127.0.0.1 --port 8000
+```
 
-"Open camera" → Activates vision mode.
+Open:
 
-Use the Web App → Enables vision and chat features.
+```text
+http://127.0.0.1:8000
+```
 
-🔮 Future Improvements
+## Useful Commands
 
-Add integrations with APIs (news, stock market, reminders).
+```text
+help
+status
+voice status
+vision status
+document status
+browser status
+remember this: my preferred model is qwen
+what do you remember
+forget memory 1
+search for local AI assistants
+google search Ollama Qwen
+open chrome
+open folder .
+list files .
+read document notes.txt
+take screenshot
+```
 
-Smarter conversations with advanced AI models.
+## API
 
-Desktop GUI version.
+- `GET /health`
+- `POST /chat`
+- `GET /memories`
+- `POST /memories`
+- `DELETE /memories/{memory_id}`
+- `GET /tools`
+- `POST /tools/execute`
+- `GET /voice/status`
+- `POST /voice/speak`
+- `GET /vision/status`
+- `POST /vision/screenshot`
+- `POST /vision/inspect`
+- `GET /documents/status`
+- `POST /documents/read`
+- `GET /browser/status`
+- `GET /desktop/system`
 
-Mobile integration.
+## Configuration
+
+Copy `.env.example` to `.env` and adjust as needed.
+
+Important values:
+
+```text
+ARISH_OLLAMA_URL=http://127.0.0.1:11434
+ARISH_OLLAMA_MODEL=qwen3:4b
+ARISH_REQUEST_TIMEOUT=120
+ARISH_WAKE_WORD=Arish
+ARISH_DOCUMENTS_DIR=documents
+ARISH_SCREENSHOTS_DIR=data/screenshots
+ARISH_PIPER_EXECUTABLE=piper
+ARISH_PIPER_VOICE=
+```
+
+## Tests
+
+```powershell
+python -m unittest discover -s tests
+```
+
+Expected result:
+
+```text
+10 tests OK
+```

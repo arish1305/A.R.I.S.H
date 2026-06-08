@@ -1,0 +1,777 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>A.R.I.S.H Dashboard</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f6f1;
+        --panel: #ffffff;
+        --ink: #1e2424;
+        --muted: #66706d;
+        --line: #d9ded8;
+        --accent: #27735a;
+        --accent-ink: #ffffff;
+        --soft: #e8f2ec;
+        --warn: #aa4d38;
+        --code: #f7f7f4;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: 244px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      aside {
+        background: #fbfbf8;
+        border-right: 1px solid var(--line);
+        padding: 20px 16px;
+      }
+
+      .brand {
+        display: grid;
+        gap: 4px;
+        margin-bottom: 20px;
+      }
+
+      .brand strong {
+        font-size: 22px;
+        letter-spacing: 0;
+      }
+
+      .brand span,
+      .status-row,
+      .muted,
+      .log-entry,
+      .meta {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .tabs {
+        display: grid;
+        gap: 8px;
+      }
+
+      .tab {
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+        min-height: 42px;
+        padding: 9px 12px;
+        text-align: left;
+      }
+
+      .tab[aria-selected="true"] {
+        background: var(--soft);
+        border-color: #bfd8cb;
+        color: #143f30;
+      }
+
+      main {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        min-width: 0;
+      }
+
+      header {
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        gap: 16px;
+        justify-content: space-between;
+        min-height: 68px;
+        padding: 14px 24px;
+      }
+
+      h1 {
+        font-size: 20px;
+        font-weight: 650;
+        margin: 0;
+      }
+
+      .status-row {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .dot {
+        background: var(--warn);
+        border-radius: 999px;
+        display: inline-block;
+        flex: 0 0 auto;
+        height: 9px;
+        width: 9px;
+      }
+
+      .dot.ok {
+        background: var(--accent);
+      }
+
+      .view {
+        display: none;
+        min-height: 0;
+        padding: 24px;
+      }
+
+      .view.active {
+        display: block;
+      }
+
+      .section,
+      .chat-layout {
+        max-width: 1040px;
+      }
+
+      .chat-layout {
+        display: grid;
+        grid-template-rows: minmax(0, 1fr) auto;
+        height: calc(100vh - 116px);
+      }
+
+      .messages,
+      .panel,
+      .log-entry,
+      .memory-item {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .messages {
+        overflow: auto;
+        padding: 16px;
+      }
+
+      .message {
+        border-bottom: 1px solid #edf0ec;
+        padding: 13px 2px;
+      }
+
+      .message:last-child {
+        border-bottom: 0;
+      }
+
+      .role {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+      }
+
+      .content,
+      pre {
+        line-height: 1.48;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+
+      pre {
+        background: var(--code);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        margin: 0;
+        max-height: 360px;
+        overflow: auto;
+        padding: 12px;
+      }
+
+      form,
+      .toolbar,
+      .inline-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      form {
+        margin-top: 12px;
+      }
+
+      .toolbar {
+        align-items: center;
+        margin-bottom: 14px;
+      }
+
+      input,
+      textarea {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--ink);
+        font: inherit;
+        min-width: 0;
+        outline: none;
+        padding: 11px 12px;
+        width: 100%;
+      }
+
+      textarea {
+        min-height: 48px;
+        resize: vertical;
+      }
+
+      input:focus,
+      textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(39, 115, 90, 0.14);
+      }
+
+      button.primary,
+      button.secondary,
+      button.danger {
+        border: 1px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 650;
+        min-height: 44px;
+        padding: 0 16px;
+        white-space: nowrap;
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
+
+      button.secondary {
+        background: #ffffff;
+        border-color: var(--line);
+        color: var(--ink);
+      }
+
+      button.danger {
+        background: #fff3ef;
+        border-color: #edc2b6;
+        color: #873423;
+      }
+
+      button:disabled {
+        cursor: progress;
+        opacity: 0.62;
+      }
+
+      .grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+
+      .panel {
+        display: grid;
+        gap: 8px;
+        padding: 14px;
+      }
+
+      .panel strong {
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+
+      .list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .memory-item {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        padding: 13px 14px;
+      }
+
+      .log-entry {
+        padding: 13px 14px;
+      }
+
+      @media (max-width: 820px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        aside {
+          border-bottom: 1px solid var(--line);
+          border-right: 0;
+          padding: 14px;
+        }
+
+        .tabs {
+          grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+        }
+
+        .tab {
+          padding: 8px;
+          text-align: center;
+        }
+
+        header {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 6px;
+          padding: 14px;
+        }
+
+        .view {
+          padding: 14px;
+        }
+
+        .chat-layout {
+          height: calc(100vh - 236px);
+        }
+
+        form,
+        .toolbar,
+        .inline-actions {
+          align-items: stretch;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside>
+        <div class="brand">
+          <strong>A.R.I.S.H</strong>
+          <span>Local v3 console</span>
+        </div>
+        <nav class="tabs" aria-label="Dashboard sections">
+          <button class="tab" data-tab="chat" aria-selected="true">Chat</button>
+          <button class="tab" data-tab="voice" aria-selected="false">Voice</button>
+          <button class="tab" data-tab="memory" aria-selected="false">Memory</button>
+          <button class="tab" data-tab="documents" aria-selected="false">Documents</button>
+          <button class="tab" data-tab="vision" aria-selected="false">Vision</button>
+          <button class="tab" data-tab="settings" aria-selected="false">Settings</button>
+          <button class="tab" data-tab="logs" aria-selected="false">Logs</button>
+        </nav>
+      </aside>
+
+      <main>
+        <header>
+          <h1 id="viewTitle">Chat</h1>
+          <div class="status-row">
+            <span class="dot" id="statusDot"></span>
+            <span id="statusText">Checking system</span>
+          </div>
+        </header>
+
+        <section class="view active" id="chatView">
+          <div class="chat-layout">
+            <div class="messages" id="messages"></div>
+            <form id="chatForm">
+              <textarea id="messageInput" placeholder="Message A.R.I.S.H" autocomplete="off"></textarea>
+              <button class="primary" id="sendButton" type="submit">Send</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="view" id="voiceView">
+          <div class="section">
+            <div class="toolbar">
+              <button class="secondary" type="button" id="refreshVoiceButton">Refresh</button>
+            </div>
+            <div class="grid" id="voiceGrid"></div>
+            <form id="speakForm">
+              <textarea id="speakInput" placeholder="Text for Piper"></textarea>
+              <button class="primary" type="submit">Speak</button>
+            </form>
+            <pre id="voiceOutput"></pre>
+          </div>
+        </section>
+
+        <section class="view" id="memoryView">
+          <div class="section">
+            <form class="toolbar" id="memoryForm">
+              <input id="memoryInput" placeholder="Add memory" />
+              <button class="primary" type="submit">Remember</button>
+              <button class="secondary" type="button" id="refreshMemoryButton">Refresh</button>
+            </form>
+            <div class="list" id="memoryList"></div>
+          </div>
+        </section>
+
+        <section class="view" id="documentsView">
+          <div class="section">
+            <div class="toolbar">
+              <button class="secondary" type="button" id="refreshDocumentsButton">Refresh</button>
+            </div>
+            <div class="grid" id="documentsGrid"></div>
+            <form id="documentForm">
+              <input id="documentPathInput" placeholder="Document path" />
+              <button class="primary" type="submit">Read</button>
+            </form>
+            <pre id="documentOutput"></pre>
+          </div>
+        </section>
+
+        <section class="view" id="visionView">
+          <div class="section">
+            <div class="toolbar">
+              <button class="secondary" type="button" id="refreshVisionButton">Refresh</button>
+              <button class="primary" type="button" id="screenshotButton">Screenshot</button>
+            </div>
+            <div class="grid" id="visionGrid"></div>
+            <form id="imageForm">
+              <input id="imagePathInput" placeholder="Image path" />
+              <button class="primary" type="submit">Inspect</button>
+            </form>
+            <pre id="visionOutput"></pre>
+          </div>
+        </section>
+
+        <section class="view" id="settingsView">
+          <div class="section">
+            <div class="toolbar">
+              <button class="secondary" type="button" id="refreshSettingsButton">Refresh</button>
+            </div>
+            <div class="grid" id="settingsGrid"></div>
+            <div class="grid" id="toolsGrid"></div>
+          </div>
+        </section>
+
+        <section class="view" id="logsView">
+          <div class="section">
+            <div class="toolbar">
+              <button class="secondary" type="button" id="clearLogsButton">Clear</button>
+            </div>
+            <div class="list" id="logs"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      const state = {
+        sessionId: "dashboard",
+        logs: [],
+        health: null,
+      };
+
+      const statusDot = document.querySelector("#statusDot");
+      const statusText = document.querySelector("#statusText");
+      const viewTitle = document.querySelector("#viewTitle");
+      const messages = document.querySelector("#messages");
+      const memoryList = document.querySelector("#memoryList");
+      const logs = document.querySelector("#logs");
+
+      function asText(value) {
+        return typeof value === "string" ? value : JSON.stringify(value, null, 2);
+      }
+
+      function addLog(text) {
+        state.logs.unshift({ text, at: new Date().toLocaleTimeString() });
+        state.logs = state.logs.slice(0, 120);
+        renderLogs();
+      }
+
+      function renderLogs() {
+        logs.replaceChildren();
+        if (state.logs.length === 0) {
+          const item = document.createElement("div");
+          item.className = "log-entry";
+          item.textContent = "No log entries";
+          logs.append(item);
+          return;
+        }
+        state.logs.forEach((entry) => {
+          const item = document.createElement("div");
+          item.className = "log-entry";
+          item.textContent = `${entry.at} - ${entry.text}`;
+          logs.append(item);
+        });
+      }
+
+      function card(label, value) {
+        const item = document.createElement("div");
+        item.className = "panel";
+        const strong = document.createElement("strong");
+        strong.textContent = label;
+        const span = document.createElement("span");
+        span.className = "content";
+        span.textContent = asText(value);
+        item.append(strong, span);
+        return item;
+      }
+
+      function renderCards(target, entries) {
+        target.replaceChildren();
+        entries.forEach(([label, value]) => target.append(card(label, value)));
+      }
+
+      function addMessage(role, content) {
+        const item = document.createElement("div");
+        item.className = "message";
+        const roleEl = document.createElement("div");
+        roleEl.className = "role";
+        roleEl.textContent = role;
+        const contentEl = document.createElement("div");
+        contentEl.className = "content";
+        contentEl.textContent = content;
+        item.append(roleEl, contentEl);
+        messages.append(item);
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      async function jsonFetch(url, options = {}) {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          throw new Error(`${url} failed with ${response.status}`);
+        }
+        return response.json();
+      }
+
+      async function sendMessage(message) {
+        addMessage("You", message);
+        addLog("Chat request sent");
+        const data = await jsonFetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, session_id: state.sessionId }),
+        });
+        addMessage("A.R.I.S.H", data.response);
+        addLog(`Action: ${(data.actions || []).join(", ") || "chat"}`);
+        await loadMemories();
+      }
+
+      async function loadHealth() {
+        state.health = await jsonFetch("/health");
+        const ready = Boolean(state.health.ok);
+        statusDot.classList.toggle("ok", ready);
+        const model = state.health.ollama_effective_model || "offline";
+        statusText.textContent = ready ? `API ready, model ${model}` : "System unavailable";
+        renderSettings();
+      }
+
+      async function loadVoice() {
+        const data = await jsonFetch("/voice/status");
+        renderCards(document.querySelector("#voiceGrid"), [
+          ["Wake Word", data.data.wake_word],
+          ["STT", data.data.stt],
+          ["TTS", data.data.tts],
+          ["Wake Engine", data.data.wake_word_engine],
+        ]);
+        document.querySelector("#voiceOutput").textContent = data.message;
+      }
+
+      async function loadDocumentsStatus() {
+        const data = await jsonFetch("/documents/status");
+        renderCards(document.querySelector("#documentsGrid"), [
+          ["Folder", data.data.documents_dir],
+          ["Supported", data.data.supported.join(", ")],
+          ["Optional Packages", data.data.optional_packages.join(", ")],
+        ]);
+      }
+
+      async function loadVision() {
+        const data = await jsonFetch("/vision/status");
+        renderCards(document.querySelector("#visionGrid"), [
+          ["Model", data.data.model],
+          ["Implemented", data.data.implemented.join(", ")],
+          ["Staged", data.data.staged.join(", ")],
+        ]);
+        document.querySelector("#visionOutput").textContent = data.message;
+      }
+
+      async function loadTools() {
+        const data = await jsonFetch("/tools");
+        renderCards(
+          document.querySelector("#toolsGrid"),
+          (data.tools || []).map((tool) => [tool.name, tool.description])
+        );
+      }
+
+      async function loadMemories() {
+        const data = await jsonFetch("/memories");
+        renderMemories(data.memories || []);
+      }
+
+      function renderMemories(memories) {
+        memoryList.replaceChildren();
+        if (memories.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "memory-item";
+          empty.textContent = "No saved memories";
+          memoryList.append(empty);
+          return;
+        }
+        memories.forEach((memory) => {
+          const item = document.createElement("div");
+          item.className = "memory-item";
+          const body = document.createElement("div");
+          const content = document.createElement("div");
+          content.className = "content";
+          content.textContent = memory.content;
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.textContent = `Memory ${memory.id}`;
+          body.append(content, meta);
+          const button = document.createElement("button");
+          button.className = "danger";
+          button.type = "button";
+          button.textContent = "Forget";
+          button.addEventListener("click", async () => {
+            await fetch(`/memories/${memory.id}`, { method: "DELETE" });
+            addLog(`Forgot memory ${memory.id}`);
+            await loadMemories();
+          });
+          item.append(body, button);
+          memoryList.append(item);
+        });
+      }
+
+      function renderSettings() {
+        const health = state.health || {};
+        renderCards(document.querySelector("#settingsGrid"), [
+          ["Project", `${health.project || "A.R.I.S.H"} ${health.version || ""}`],
+          ["Configured Model", health.ollama_model || "qwen3:4b"],
+          ["Active Model", health.ollama_effective_model || "offline"],
+          ["Wake Word", health.wake_word || "Arish"],
+          ["Internet Tools", health.internet_tools ? "Enabled" : "Disabled"],
+          ["Desktop Tools", health.desktop_tools ? "Enabled" : "Disabled"],
+          ["Database", health.db_path || ""],
+        ]);
+      }
+
+      document.querySelector("#chatForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const input = document.querySelector("#messageInput");
+        const button = document.querySelector("#sendButton");
+        const message = input.value.trim();
+        if (!message) return;
+        input.value = "";
+        button.disabled = true;
+        try {
+          await sendMessage(message);
+        } catch (error) {
+          addMessage("A.R.I.S.H", error.message);
+          addLog(error.message);
+        } finally {
+          button.disabled = false;
+          input.focus();
+        }
+      });
+
+      document.querySelector("#memoryForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const input = document.querySelector("#memoryInput");
+        const content = input.value.trim();
+        if (!content) return;
+        await jsonFetch("/memories", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content }),
+        });
+        input.value = "";
+        addLog("Memory saved");
+        await loadMemories();
+      });
+
+      document.querySelector("#speakForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const text = document.querySelector("#speakInput").value.trim();
+        if (!text) return;
+        const data = await jsonFetch("/voice/speak", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        document.querySelector("#voiceOutput").textContent = asText(data);
+        addLog("Voice speak requested");
+      });
+
+      document.querySelector("#documentForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const path = document.querySelector("#documentPathInput").value.trim();
+        if (!path) return;
+        const data = await jsonFetch("/documents/read", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path }),
+        });
+        document.querySelector("#documentOutput").textContent = asText(data);
+        addLog("Document read requested");
+      });
+
+      document.querySelector("#imageForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const path = document.querySelector("#imagePathInput").value.trim();
+        if (!path) return;
+        const data = await jsonFetch("/vision/inspect", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path }),
+        });
+        document.querySelector("#visionOutput").textContent = asText(data);
+        addLog("Image inspect requested");
+      });
+
+      document.querySelector("#screenshotButton").addEventListener("click", async () => {
+        const data = await jsonFetch("/vision/screenshot", { method: "POST" });
+        document.querySelector("#visionOutput").textContent = asText(data);
+        addLog("Screenshot requested");
+      });
+
+      document.querySelector("#refreshMemoryButton").addEventListener("click", loadMemories);
+      document.querySelector("#refreshVoiceButton").addEventListener("click", loadVoice);
+      document.querySelector("#refreshDocumentsButton").addEventListener("click", loadDocumentsStatus);
+      document.querySelector("#refreshVisionButton").addEventListener("click", loadVision);
+      document.querySelector("#refreshSettingsButton").addEventListener("click", async () => {
+        await loadHealth();
+        await loadTools();
+      });
+      document.querySelector("#clearLogsButton").addEventListener("click", () => {
+        state.logs = [];
+        renderLogs();
+      });
+
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".tab").forEach((tab) => {
+            tab.setAttribute("aria-selected", String(tab === button));
+          });
+          document.querySelectorAll(".view").forEach((view) => {
+            view.classList.remove("active");
+          });
+          document.querySelector(`#${button.dataset.tab}View`).classList.add("active");
+          viewTitle.textContent = button.textContent;
+        });
+      });
+
+      addMessage("A.R.I.S.H", "Local systems are online.");
+      renderLogs();
+      Promise.allSettled([
+        loadHealth(),
+        loadMemories(),
+        loadVoice(),
+        loadDocumentsStatus(),
+        loadVision(),
+        loadTools(),
+      ]).then((results) => {
+        results.forEach((result) => {
+          if (result.status === "rejected") addLog(result.reason.message);
+        });
+      });
+      setInterval(() => loadHealth().catch((error) => addLog(error.message)), 15000);
+    </script>
+  </body>
+</html>
