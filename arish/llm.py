@@ -51,7 +51,7 @@ class LocalLLM:
             if model == configured or model.split(":", 1)[0] == configured_base:
                 return model
 
-        preferred = ("llama3", "mistral", "deepseek-coder")
+        preferred = ("qwen3", "llama3", "mistral", "deepseek-coder")
         for preferred_base in preferred:
             for model in installed:
                 if model.split(":", 1)[0] == preferred_base:

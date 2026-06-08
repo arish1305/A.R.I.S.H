@@ -1,23 +1,50 @@
 # A.R.I.S.H
 
-A.R.I.S.H stands for Artificial Responsive Intelligent System Helper. This
-version is a local-first assistant foundation: it runs without LiveKit, OpenAI,
-Google realtime models, or other proprietary AI services.
+A.R.I.S.H means Artificial Responsive Intelligent System Helper. Version 3.0 is
+a local-first assistant foundation for a JARVIS-inspired desktop AI assistant.
+It avoids LiveKit, OpenAI APIs, Anthropic APIs, Gemini APIs, LangChain, CrewAI,
+AutoGPT, and paid AI services.
 
-The project now starts cleanly as a CLI, FastAPI backend, and browser dashboard.
-Ollama is optional. When Ollama is not running, A.R.I.S.H still handles built-in
-commands with a local fallback instead of crashing.
+## Current Status
 
-## What Works Now
+Working now:
 
-- Local CLI chat through `python agent.py` or `python main.py`
-- FastAPI API and dashboard through `python main.py api`
-- SQLite short-term chat history and long-term memories
-- Memory commands: remember, list, summarize, and forget
-- DuckDuckGo search-link creation without sending data automatically
-- Optional live weather via `wttr.in`
-- Safe desktop launching for whitelisted apps
-- Optional Ollama integration for local LLM responses
+- Local CLI chat through `python main.py`
+- FastAPI backend and dashboard at `http://127.0.0.1:8000`
+- Ollama integration with Qwen preferred
+- SQLite chat history and memory commands
+- Native tool registry
+- Desktop helpers for safe app/folder/file/system actions
+- Browser URL and search helpers
+- Document reader for TXT, Markdown, PDF, and DOCX
+- Vision readiness plus screenshot capture through `mss`
+- Voice readiness checks for Whisper, Piper, and OpenWakeWord
+
+Staged for the next implementation pass:
+
+- Always-listening OpenWakeWord loop
+- Whisper microphone transcription
+- Piper playback integration
+- ChromaDB semantic long-term memory
+- Playwright autonomous browser control
+- Florence-2 OCR and image understanding
+- Webcam capture
+
+## Requirements
+
+- Windows, macOS, or Linux
+- Python 3.11 recommended
+- Ollama installed and running locally
+- A local Ollama model, preferably Qwen
+
+This machine currently works with:
+
+```text
+qwen3:latest
+```
+
+The v3 config asks for `qwen3:4b`, and A.R.I.S.H automatically uses an installed
+Qwen model if the exact tag is not present.
 
 ## Setup
 
@@ -27,68 +54,100 @@ python -m venv venv
 python -m pip install -r requirements.txt
 ```
 
-## Run The Assistant
-
-Interactive CLI:
+Start Ollama:
 
 ```powershell
-python agent.py
+ollama serve
+```
+
+Install or run Qwen:
+
+```powershell
+ollama pull qwen3
+```
+
+## Run
+
+CLI:
+
+```powershell
+python main.py
 ```
 
 One message:
 
 ```powershell
-python main.py chat "remember this: my preferred model is qwen3"
-python main.py chat "what do you remember"
+python main.py chat "who are you"
 ```
 
-API and dashboard:
+Dashboard/API:
 
 ```powershell
 python main.py api --host 127.0.0.1 --port 8000
 ```
 
-Then open:
+Open:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## Optional Ollama
-
-Install Ollama, then run:
-
-```powershell
-ollama pull qwen3
-ollama run qwen3
-```
-
-A.R.I.S.H talks to Ollama at `http://127.0.0.1:11434` by default.
-
-## Environment
-
-Copy `.env.example` to `.env` and adjust values as needed.
+## Useful Commands
 
 ```text
-ARISH_OLLAMA_URL=http://127.0.0.1:11434
-ARISH_OLLAMA_MODEL=qwen3
-ARISH_ENABLE_INTERNET_TOOLS=false
-ARISH_ENABLE_DESKTOP_TOOLS=true
-ARISH_OPEN_BROWSER_ON_SEARCH=false
-ARISH_DB_PATH=data/arish.sqlite3
+help
+status
+voice status
+vision status
+document status
+browser status
+remember this: my preferred model is qwen
+what do you remember
+forget memory 1
+search for local AI assistants
+google search Ollama Qwen
+open chrome
+open folder .
+list files .
+read document notes.txt
+take screenshot
 ```
-
-Set `ARISH_ENABLE_INTERNET_TOOLS=true` only when you want network-backed tools
-like live weather. Search commands create a URL by default and do not fetch
-results automatically.
 
 ## API
 
 - `GET /health`
-- `POST /chat` with `{ "message": "...", "session_id": "default" }`
+- `POST /chat`
 - `GET /memories`
-- `POST /memories` with `{ "content": "...", "tags": [] }`
+- `POST /memories`
 - `DELETE /memories/{memory_id}`
+- `GET /tools`
+- `POST /tools/execute`
+- `GET /voice/status`
+- `POST /voice/speak`
+- `GET /vision/status`
+- `POST /vision/screenshot`
+- `POST /vision/inspect`
+- `GET /documents/status`
+- `POST /documents/read`
+- `GET /browser/status`
+- `GET /desktop/system`
+
+## Configuration
+
+Copy `.env.example` to `.env` and adjust as needed.
+
+Important values:
+
+```text
+ARISH_OLLAMA_URL=http://127.0.0.1:11434
+ARISH_OLLAMA_MODEL=qwen3:4b
+ARISH_REQUEST_TIMEOUT=120
+ARISH_WAKE_WORD=Arish
+ARISH_DOCUMENTS_DIR=documents
+ARISH_SCREENSHOTS_DIR=data/screenshots
+ARISH_PIPER_EXECUTABLE=piper
+ARISH_PIPER_VOICE=
+```
 
 ## Tests
 
@@ -96,11 +155,8 @@ results automatically.
 python -m unittest discover -s tests
 ```
 
-## Next Build Targets
+Expected result:
 
-- Whisper speech-to-text module
-- Piper text-to-speech module
-- OpenWakeWord wake-word listener
-- ChromaDB semantic memory
-- Playwright browser agent
-- Vision module for webcam and screenshots
+```text
+10 tests OK
+```

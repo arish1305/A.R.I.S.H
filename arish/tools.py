@@ -156,6 +156,10 @@ class AssistantTools:
                 "explorer": ["explorer.exe"],
                 "vscode": ["code.cmd"],
                 "vs code": ["code.cmd"],
+                "chrome": ["cmd.exe", "/c", "start", "", "chrome"],
+                "discord": ["cmd.exe", "/c", "start", "", "discord"],
+                "spotify": ["cmd.exe", "/c", "start", "", "spotify"],
+                "steam": ["cmd.exe", "/c", "start", "", "steam"],
             }
         elif system == "darwin":
             apps = {
@@ -166,6 +170,10 @@ class AssistantTools:
                 "finder": ["open", "."],
                 "vscode": ["code"],
                 "vs code": ["code"],
+                "chrome": ["open", "-a", "Google Chrome"],
+                "discord": ["open", "-a", "Discord"],
+                "spotify": ["open", "-a", "Spotify"],
+                "steam": ["open", "-a", "Steam"],
             }
         else:
             apps = {
@@ -176,6 +184,10 @@ class AssistantTools:
                 "files": ["xdg-open", "."],
                 "vscode": ["code"],
                 "vs code": ["code"],
+                "chrome": ["google-chrome"],
+                "discord": ["discord"],
+                "spotify": ["spotify"],
+                "steam": ["steam"],
             }
 
         return apps.get(target)

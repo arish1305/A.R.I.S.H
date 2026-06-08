@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass, field
 from arish.config import AppConfig
 from arish.llm import LocalLLM
 from arish.memory import MemoryStore
+from arish.tool_registry import ToolRegistry
 from arish.tools import AssistantTools, ToolResult
 
 
@@ -41,6 +42,7 @@ class Assistant:
         self.memory = memory or MemoryStore(self.config.db_path)
         self.llm = llm or LocalLLM(self.config)
         self.tools = tools or AssistantTools(self.config)
+        self.registry = ToolRegistry(self.config)
 
     def handle(self, message: str, session_id: str = "default") -> ChatResponse:
         clean_message = self._strip_wake_word(message).strip()
@@ -102,6 +104,21 @@ class Assistant:
                 data,
             )
 
+        if lowered in {"voice status", "voice system", "wake word status"}:
+            return self.registry.voice.status()
+
+        if lowered in {"vision status", "camera status", "screenshot status"}:
+            return self.registry.vision.status()
+
+        if lowered in {"browser status", "browser agent status"}:
+            return self.registry.browser.status()
+
+        if lowered in {"document status", "documents status", "document agent status"}:
+            return self.registry.documents.status()
+
+        if lowered in {"system info", "system information", "monitor system"}:
+            return self.registry.desktop.system_info()
+
         if "what do you remember" in lowered or lowered in {
             "list memories",
             "show memories",
@@ -161,6 +178,58 @@ class Assistant:
         if search_match:
             return self.tools.web_search(search_match.group("query"))
 
+        google_match = re.match(
+            r"^google\s+search\s+(?P<query>.+)$",
+            message,
+            flags=re.IGNORECASE,
+        )
+        if google_match:
+            return self.registry.browser.google_search(google_match.group("query"))
+
+        open_url_match = re.match(
+            r"^open\s+(?:url|website|site)\s+(?P<url>.+)$",
+            message,
+            flags=re.IGNORECASE,
+        )
+        if open_url_match:
+            return self.registry.browser.open_url(open_url_match.group("url"))
+
+        list_files_match = re.match(
+            r"^list\s+files(?:\s+in)?\s*(?P<folder>.*)$",
+            message,
+            flags=re.IGNORECASE,
+        )
+        if list_files_match:
+            folder = list_files_match.group("folder").strip() or "."
+            return self.registry.desktop.list_files(folder)
+
+        open_folder_match = re.match(
+            r"^open\s+folder\s+(?P<folder>.+)$",
+            message,
+            flags=re.IGNORECASE,
+        )
+        if open_folder_match:
+            return self.registry.desktop.open_folder(open_folder_match.group("folder"))
+
+        open_file_match = re.match(
+            r"^open\s+file\s+(?P<file>.+)$",
+            message,
+            flags=re.IGNORECASE,
+        )
+        if open_file_match:
+            return self.registry.desktop.open_file(open_file_match.group("file"))
+
+        if lowered in {"take screenshot", "capture screenshot", "screenshot"}:
+            return self.registry.vision.take_screenshot()
+
+        read_document_match = re.match(
+            r"^(?:read|load)\s+(?:document|pdf|file)\s+(?P<path>.+)$",
+            message,
+            flags=re.IGNORECASE,
+        )
+        if read_document_match:
+            return self.registry.documents.read_document(read_document_match.group("path"))
+
         open_match = re.match(
             r"^(?:open|launch|start)\s+(?P<target>.+)$",
             message,
@@ -196,8 +265,11 @@ class Assistant:
     def help_text() -> str:
         return (
             "Commands: remember this: <fact>; what do you remember; forget memory <id>; "
-            "search for <query>; weather in <city>; open <browser|calculator|notepad|terminal|vscode>; "
-            "status. General chat uses Ollama when it is running."
+            "search for <query>; google search <query>; weather in <city>; "
+            "open <browser|calculator|notepad|terminal|vscode|chrome|spotify>; "
+            "open folder <path>; list files <path>; read document <path>; "
+            "take screenshot; voice status; vision status; document status; browser status; "
+            "status. General chat uses local Ollama."
         )
 
     @staticmethod

@@ -5,6 +5,7 @@ from pathlib import Path
 
 from arish.agent import Assistant
 from arish.config import AppConfig, PROJECT_ROOT
+from arish.tool_registry import ToolRegistry
 
 
 try:
@@ -31,16 +32,30 @@ class MemoryCreateRequest(BaseModel):  # type: ignore[misc]
     tags: list[str] = []
 
 
+class ToolExecuteRequest(BaseModel):  # type: ignore[misc]
+    name: str = Field(..., min_length=1)
+    arguments: dict[str, object] = {}
+
+
+class PathRequest(BaseModel):  # type: ignore[misc]
+    path: str = Field(..., min_length=1)
+
+
+class SpeakRequest(BaseModel):  # type: ignore[misc]
+    text: str = Field(..., min_length=1)
+
+
 def create_app(config: AppConfig | None = None) -> "FastAPI":
     if FastAPI is None:
         raise RuntimeError("FastAPI is not installed. Run: pip install -r requirements.txt")
 
     app_config = config or AppConfig.from_env()
     assistant = Assistant(app_config)
+    registry = ToolRegistry(app_config)
     app = FastAPI(
         title="A.R.I.S.H",
         description="Local-first personal assistant API",
-        version="2.0.0",
+        version="3.0.0",
     )
 
     @app.get("/")
@@ -54,6 +69,7 @@ def create_app(config: AppConfig | None = None) -> "FastAPI":
         return {
             "ok": True,
             "project": app_config.project_name,
+            "version": app_config.version,
             "owner": app_config.owner,
             "db_path": str(app_config.db_path),
             "ollama_url": app_config.ollama_url,
@@ -62,6 +78,7 @@ def create_app(config: AppConfig | None = None) -> "FastAPI":
             "ollama_available": effective_model is not None,
             "internet_tools": app_config.enable_internet_tools,
             "desktop_tools": app_config.enable_desktop_tools,
+            "wake_word": app_config.wake_word,
         }
 
     @app.post("/chat")
@@ -84,6 +101,51 @@ def create_app(config: AppConfig | None = None) -> "FastAPI":
         if not assistant.memory.delete_memory(memory_id):
             raise HTTPException(status_code=404, detail="Memory not found")
         return {"deleted": True, "memory_id": memory_id}
+
+    @app.get("/tools")
+    def tools() -> dict[str, object]:
+        return {"tools": [asdict(tool) for tool in registry.list_tools()]}
+
+    @app.post("/tools/execute")
+    def execute_tool(request: ToolExecuteRequest) -> dict[str, object]:
+        result = registry.execute(request.name, request.arguments)
+        return asdict(result)
+
+    @app.get("/voice/status")
+    def voice_status() -> dict[str, object]:
+        return asdict(registry.voice.status())
+
+    @app.post("/voice/speak")
+    def voice_speak(request: SpeakRequest) -> dict[str, object]:
+        return asdict(registry.voice.speak(request.text))
+
+    @app.get("/vision/status")
+    def vision_status() -> dict[str, object]:
+        return asdict(registry.vision.status())
+
+    @app.post("/vision/screenshot")
+    def vision_screenshot() -> dict[str, object]:
+        return asdict(registry.vision.take_screenshot())
+
+    @app.post("/vision/inspect")
+    def vision_inspect(request: PathRequest) -> dict[str, object]:
+        return asdict(registry.vision.inspect_image(request.path))
+
+    @app.get("/documents/status")
+    def documents_status() -> dict[str, object]:
+        return asdict(registry.documents.status())
+
+    @app.post("/documents/read")
+    def documents_read(request: PathRequest) -> dict[str, object]:
+        return asdict(registry.documents.read_document(request.path))
+
+    @app.get("/browser/status")
+    def browser_status() -> dict[str, object]:
+        return asdict(registry.browser.status())
+
+    @app.get("/desktop/system")
+    def desktop_system() -> dict[str, object]:
+        return asdict(registry.desktop.system_info())
 
     @app.get("/dashboard-file")
     def dashboard_file() -> dict[str, str]:

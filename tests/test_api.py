@@ -22,6 +22,8 @@ class ApiTestCase(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory()
         config = AppConfig(
             db_path=Path(self.temp_dir.name) / "api.sqlite3",
+            documents_dir=Path(self.temp_dir.name) / "documents",
+            screenshots_dir=Path(self.temp_dir.name) / "screenshots",
             request_timeout=0.01,
             enable_internet_tools=False,
             enable_desktop_tools=False,
@@ -47,6 +49,30 @@ class ApiTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["actions"], ["memory"])
         self.assertEqual(memories[0]["content"], "dashboard works")
+
+    def test_v3_status_and_tools_routes(self) -> None:
+        health = self.client.get("/health").json()
+        tools = self.client.get("/tools").json()["tools"]
+        voice = self.client.get("/voice/status").json()
+        documents = self.client.get("/documents/status").json()
+        vision = self.client.get("/vision/status").json()
+
+        self.assertEqual(health["version"], "3.0")
+        self.assertIn("open_app", {tool["name"] for tool in tools})
+        self.assertEqual(voice["name"], "voice")
+        self.assertEqual(documents["name"], "documents")
+        self.assertEqual(vision["name"], "vision")
+
+    def test_document_read_txt(self) -> None:
+        doc_path = Path(self.temp_dir.name) / "documents" / "note.txt"
+        doc_path.parent.mkdir(parents=True, exist_ok=True)
+        doc_path.write_text("local document works", encoding="utf-8")
+
+        response = self.client.post("/documents/read", json={"path": "note.txt"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        self.assertIn("local document works", response.json()["data"]["preview"])
 
 
 if __name__ == "__main__":

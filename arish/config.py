@@ -54,14 +54,21 @@ def _env_float(name: str, default: float) -> float:
 @dataclass(frozen=True)
 class AppConfig:
     project_name: str = "A.R.I.S.H"
+    version: str = "3.0"
     owner: str = "Arish Vijay"
     db_path: Path = PROJECT_ROOT / "data" / "arish.sqlite3"
     ollama_url: str = "http://127.0.0.1:11434"
-    ollama_model: str = "qwen3"
+    ollama_model: str = "qwen3:4b"
     request_timeout: float = 120.0
     enable_internet_tools: bool = False
     enable_desktop_tools: bool = True
     open_browser_on_search: bool = False
+    documents_dir: Path = PROJECT_ROOT / "documents"
+    screenshots_dir: Path = PROJECT_ROOT / "data" / "screenshots"
+    piper_executable: str = "piper"
+    piper_voice: str = ""
+    whisper_model: str = "small"
+    wake_word: str = "Arish"
     log_level: str = "INFO"
 
     @classmethod
@@ -71,6 +78,7 @@ class AppConfig:
         db_path = Path(os.getenv("ARISH_DB_PATH", str(cls.db_path))).expanduser()
         return cls(
             project_name=os.getenv("ARISH_PROJECT_NAME", cls.project_name),
+            version=os.getenv("ARISH_VERSION", cls.version),
             owner=os.getenv("ARISH_OWNER", cls.owner),
             db_path=db_path,
             ollama_url=os.getenv("ARISH_OLLAMA_URL", cls.ollama_url).rstrip("/"),
@@ -85,5 +93,15 @@ class AppConfig:
             open_browser_on_search=_env_bool(
                 "ARISH_OPEN_BROWSER_ON_SEARCH", cls.open_browser_on_search
             ),
+            documents_dir=Path(
+                os.getenv("ARISH_DOCUMENTS_DIR", str(cls.documents_dir))
+            ).expanduser(),
+            screenshots_dir=Path(
+                os.getenv("ARISH_SCREENSHOTS_DIR", str(cls.screenshots_dir))
+            ).expanduser(),
+            piper_executable=os.getenv("ARISH_PIPER_EXECUTABLE", cls.piper_executable),
+            piper_voice=os.getenv("ARISH_PIPER_VOICE", cls.piper_voice),
+            whisper_model=os.getenv("ARISH_WHISPER_MODEL", cls.whisper_model),
+            wake_word=os.getenv("ARISH_WAKE_WORD", cls.wake_word),
             log_level=os.getenv("ARISH_LOG_LEVEL", cls.log_level).upper(),
         )
